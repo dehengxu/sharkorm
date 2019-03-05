@@ -461,6 +461,12 @@ void spatialCalc(sqlite3_context *context, int argc, sqlite3_value **argv)
     char* error = 0;
     sqlite3_exec(handle, [sql UTF8String], nil, nil, &error);
     if (error) {
+        if ([[SRKGlobals sharedObject].delegate respondsToSelector:@selector(databaseError:)]) {
+            SRKError *e = [[SRKError alloc] init];
+            e.errorMessage = [NSString stringWithCString:error encoding:NSUTF8StringEncoding];
+            e.sqlQuery = sql;
+            [SRKGlobals.sharedObject.delegate databaseError: e];
+        }
         free(error);
     }
 }
